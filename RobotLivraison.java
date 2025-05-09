@@ -6,7 +6,6 @@ import java.util.Random;
 public class RobotLivraison extends RobotConnecte {
     private String colis;
     private String destination;
-    private static final int ENERGIE_LIVRAISON = 10;
     private static final int ENERGIE_CHARGEMENT = 5;
     private Color color;
 

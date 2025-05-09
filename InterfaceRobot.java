@@ -2,7 +2,6 @@ package code;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,22 +17,6 @@ public class InterfaceRobot {
     private static JLabel lblTempsRestant;
     private static Timer rechargeVerteTimer;
     private static int oldEnergie = -1;
-
-    public static class Destination {
-        private final String name;
-        private final int x;
-        private final int y;
-        
-        public Destination(String name, int x, int y) {
-            this.name = name;
-            this.x = x;
-            this.y = y;
-        }
-        
-        public int getX() { return x; }
-        public int getY() { return y; }
-        public String getName() { return name; }
-    }
 
     public static void demarrerInterface() {
         framePrincipale = new JFrame("Gestion des Robots de Livraison");
@@ -55,7 +38,6 @@ public class InterfaceRobot {
         }
 
         onglets = new JTabbedPane();
-
         // Onglet Liste
         JPanel listePanel = creerListePanel();
         onglets.addTab("Liste des Robots", listePanel);
@@ -73,8 +55,7 @@ public class InterfaceRobot {
                 for (int i = 0; i < getHeight(); i += 50) {
                     g.drawLine(0, i, getWidth(), i);
                 }
-
-                // Dessiner les destinations (carrés noirs)
+                // Dessiner les destinations
                 g.setColor(Color.BLACK);
                 for (Destination dest : destinations) {
                     int x = dest.getX() * 8;
@@ -110,8 +91,14 @@ public class InterfaceRobot {
         JButton btnNouveau = new JButton("Nouveau Robot");
         JPanel panelRobots = new JPanel();
         panelRobots.setLayout(new BoxLayout(panelRobots, BoxLayout.Y_AXIS));
-
-        btnNouveau.addActionListener(e -> creerNouveauRobot());
+        btnNouveau.addActionListener(e -> {
+			try {
+				creerNouveauRobot();
+			} catch (RobotException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
 
         for (RobotLivraison robot : robots) {
             ajouterBoutonRobot(panelRobots, robot);
@@ -122,7 +109,7 @@ public class InterfaceRobot {
         return listePanel;
     }
 
-    private static void creerNouveauRobot() {
+    private static void creerNouveauRobot() throws RobotException {
         JTextField idField = new JTextField();
         JTextField xField = new JTextField();
         JTextField yField = new JTextField();
@@ -146,13 +133,19 @@ public class InterfaceRobot {
             try {
                 int x = Integer.parseInt(xField.getText());
                 int y = Integer.parseInt(yField.getText());
+                String iden = idField.getText();
                 if(x < 0 || x > 100 || y < 0 || y > 100) {
                     throw new NumberFormatException();
+                }
+                for (RobotLivraison robot : robots) {
+                	if(iden.equals(robot.getId())) {
+                		throw new RobotException("id redondante!");
+                	}
                 }
                 RobotLivraison robot = new RobotLivraison(idField.getText(), x, y);
                 robots.add(robot);
                 actualiserInterface1();
-            } catch (NumberFormatException ex) {
+            } catch (NumberFormatException ex ) {
                 afficherErreur("Coordonnées invalides ! (0-100 seulement)");
             }
         }
@@ -237,7 +230,7 @@ public class InterfaceRobot {
         // Ajoutez un onglet pour la maintenance et l'écologie
         JTabbedPane ongletsDetails = new JTabbedPane();
         
-        // Onglet principal (existant)
+        // Onglet principal 
         ongletsDetails.addTab("Informations", gauchePanel);
         
         // Nouvel onglet Maintenance & Écologie
@@ -567,26 +560,8 @@ public class InterfaceRobot {
         JPanel robotPanel = new JPanel(new BorderLayout());
         
         JButton btn = new JButton(robot.toString());
-        btn.addActionListener(e -> afficherDetailsRobot(robot));
-        
-        // Mini indicateur écologique
-        JPanel ecoIndicator = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        
-        // Icône maintenance
-        JLabel maintenanceIcon = new JLabel("⚙");
-        maintenanceIcon.setForeground(getCouleurMaintenance(robot.getEtatMaintenance()));
-        ecoIndicator.add(maintenanceIcon);
-        
-        // Barre score écologique miniature
-        JProgressBar miniBar = new JProgressBar(0, 100);
-        miniBar.setValue(robot.getScoreEcologique());
-        miniBar.setForeground(getCouleurScore(robot.getScoreEcologique()));
-        miniBar.setPreferredSize(new Dimension(50, 8));
-        miniBar.setStringPainted(false);
-        ecoIndicator.add(miniBar);
-        
+        btn.addActionListener(e -> afficherDetailsRobot(robot));      
         robotPanel.add(btn, BorderLayout.CENTER);
-        robotPanel.add(ecoIndicator, BorderLayout.EAST);
         panel.add(robotPanel);
     }
 

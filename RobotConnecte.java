@@ -1,5 +1,9 @@
 package code;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public abstract class RobotConnecte extends Robot implements Connectable {
     protected boolean connecte;
     protected String reseauConnecte;
@@ -9,7 +13,6 @@ public abstract class RobotConnecte extends Robot implements Connectable {
         this.connecte = false;
         this.reseauConnecte = null;
     }
-
     @Override
     public void connecter(String reseau) throws RobotException {
         verifierEnergie(5);
@@ -20,6 +23,9 @@ public abstract class RobotConnecte extends Robot implements Connectable {
         connecte = true;
         consommerEnergie(5);
         ajouterHistorique("Connecté au réseau: " + reseau);
+     // Utiliser un ScheduledExecutorService pour planifier la déconnexion après 15 secondes
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        scheduler.schedule(this::deconnecter, 30, TimeUnit.SECONDS);
     }
 
     @Override

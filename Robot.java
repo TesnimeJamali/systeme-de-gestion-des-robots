@@ -153,6 +153,6 @@ public abstract class Robot {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " " + id + " - Énergie: " + energie + "%";
+        return id + " - Énergie: " + energie + "% - ("+x+","+y+") - score eco : "+scoreEcologique;
     }
 }
